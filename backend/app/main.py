@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.db.base import engine
 from app.services.queue.redis_service import redis_service
-from app.api.endpoints import health, cad, projects, designs, jobs, printer_profiles, print_jobs
+from app.api.endpoints import health, cad, projects, designs, jobs, printer_profiles, print_jobs, design
 from app.api.websockets import ws_router
 
 logger = structlog.get_logger()
@@ -67,6 +67,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router, tags=["Health"])
 app.include_router(cad.router, prefix="/api/v1/cad", tags=["CAD"])
+app.include_router(design.router, prefix="/api/v1/design", tags=["Design Workflow"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
 app.include_router(designs.router, prefix="/api/v1/designs", tags=["Designs"])
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])

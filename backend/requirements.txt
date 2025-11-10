@@ -43,6 +43,7 @@ trimesh==4.1.4
 numpy==1.26.4
 scipy==1.12.0
 cadquery==2.4.0
+cadquery-ocp==7.7.2
 ezdxf==1.2.0
 
 # File Processing
