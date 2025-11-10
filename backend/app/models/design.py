@@ -53,6 +53,16 @@ class Design(Base):
         back_populates="design",
         cascade="all, delete-orphan"
     )
+    agent_conversations: Mapped[List["AgentConversation"]] = relationship(
+        "AgentConversation",
+        back_populates="design",
+        cascade="all, delete-orphan"
+    )
+    print_jobs: Mapped[List["PrintJob"]] = relationship(
+        "PrintJob",
+        back_populates="design",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Design(id={self.id}, name={self.name}, version={self.current_version})>"
@@ -88,6 +98,11 @@ class DesignVersion(Base):
 
     # Relationships
     design: Mapped["Design"] = relationship("Design", back_populates="versions")
+    cad_files: Mapped[List["CADFile"]] = relationship(
+        "CADFile",
+        back_populates="design_version",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<DesignVersion(id={self.id}, design_id={self.design_id}, version={self.version_number})>"

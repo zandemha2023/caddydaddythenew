@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.db.base import engine
 from app.services.queue.redis_service import redis_service
-from app.api.endpoints import health, cad, projects, designs, jobs
+from app.api.endpoints import health, cad, projects, designs, jobs, printer_profiles, print_jobs
 from app.api.websockets import ws_router
 
 logger = structlog.get_logger()
@@ -70,6 +70,8 @@ app.include_router(cad.router, prefix="/api/v1/cad", tags=["CAD"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
 app.include_router(designs.router, prefix="/api/v1/designs", tags=["Designs"])
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
+app.include_router(printer_profiles.router, prefix="/api/v1/printer-profiles", tags=["Printer Profiles"])
+app.include_router(print_jobs.router, prefix="/api/v1/print-jobs", tags=["Print Jobs"])
 app.include_router(ws_router, prefix="/ws", tags=["WebSocket"])
 
 

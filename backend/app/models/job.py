@@ -2,7 +2,7 @@
 from datetime import datetime
 from sqlalchemy import String, Text, DateTime, ForeignKey, Enum, JSON, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import uuid
 import enum
 
@@ -78,6 +78,11 @@ class Job(Base):
 
     # Relationships
     design: Mapped[Optional["Design"]] = relationship("Design", back_populates="jobs")
+    agent_conversations: Mapped[List["AgentConversation"]] = relationship(
+        "AgentConversation",
+        back_populates="job",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Job(id={self.id}, type={self.job_type}, status={self.status})>"

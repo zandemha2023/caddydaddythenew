@@ -11,7 +11,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Import models
 from app.db.base import Base
-from app.models import User, Project, Design, DesignVersion, Job
+from app.models import (
+    User, Project, Design, DesignVersion, Job,
+    AgentConversation, CADFile, PrintJob, PrinterProfile, ManufacturingParameters
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
