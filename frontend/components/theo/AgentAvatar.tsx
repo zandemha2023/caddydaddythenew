@@ -4,7 +4,7 @@ import * as React from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { Search, Box, CheckCircle, Download } from "lucide-react"
+import { Search, Box, CheckCircle, Download, User, Info } from "lucide-react"
 import { AgentType } from "@/types"
 import { getAgentColor, getAgentName } from "@/lib/utils"
 
@@ -21,6 +21,8 @@ const agentIcons: Record<AgentType, React.ReactNode> = {
   cad: <Box className="h-4 w-4" />,
   validation: <CheckCircle className="h-4 w-4" />,
   export: <Download className="h-4 w-4" />,
+  user: <User className="h-4 w-4" />,
+  system: <Info className="h-4 w-4" />,
 }
 
 const sizeClasses = {

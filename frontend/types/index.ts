@@ -1,4 +1,4 @@
-export type AgentType = 'requirements' | 'cad' | 'validation' | 'export';
+export type AgentType = 'requirements' | 'cad' | 'validation' | 'export' | 'user' | 'system';
 
 export type MessageStatus = 'thinking' | 'complete' | 'error';
 

@@ -41,36 +41,42 @@ export function formatFileSize(bytes: number): string {
   return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
-export type AgentType = 'requirements' | 'cad' | 'validation' | 'export';
+import type { AgentType } from '@/types';
 
 export function getAgentColor(agentType: AgentType): string {
-  const colors = {
+  const colors: Record<AgentType, string> = {
     requirements: '#00E5FF',
     cad: '#9D4EDD',
     validation: '#00FF88',
     export: '#FFB020',
+    user: '#FFFFFF',
+    system: '#64748B',
   };
-  return colors[agentType];
+  return colors[agentType] || '#64748B';
 }
 
 export function getAgentName(agentType: AgentType): string {
-  const names = {
+  const names: Record<AgentType, string> = {
     requirements: 'Requirements Agent',
     cad: 'CAD Agent',
     validation: 'Validation Agent',
     export: 'Export Agent',
+    user: 'You',
+    system: 'System',
   };
-  return names[agentType];
+  return names[agentType] || 'Unknown';
 }
 
 export function getAgentIcon(agentType: AgentType): string {
-  const icons = {
+  const icons: Record<AgentType, string> = {
     requirements: 'search',
     cad: 'box',
     validation: 'check-circle',
     export: 'download',
+    user: 'user',
+    system: 'info',
   };
-  return icons[agentType];
+  return icons[agentType] || 'info';
 }
 
 export function getStatusColor(status: string): string {
