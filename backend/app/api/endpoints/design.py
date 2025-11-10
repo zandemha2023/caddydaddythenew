@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
+from datetime import datetime
 import structlog
 
 from app.db.base import get_db
@@ -279,7 +280,3 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
     except Exception as e:
         logger.error("websocket_error", session_id=session_id, error=str(e))
         agent_stream_manager.disconnect(websocket, session_id)
-
-
-# Import datetime for timestamp
-from datetime import datetime

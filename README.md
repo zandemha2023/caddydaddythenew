@@ -7,14 +7,22 @@
 
 Theo is a production-grade agentic CAD platform that converts natural language descriptions into 3D models and manufacturing files for any printer. Built with a multi-agent architecture powered by Anthropic's Claude Sonnet 4.5.
 
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Complete setup and deployment instructions
+- **[Design Workflow Guide](docs/DESIGN_WORKFLOW.md)** - Detailed guide for using the intelligent design system
+- **[API Documentation](http://localhost:8000/docs)** - Interactive OpenAPI docs (when server is running)
+
 ## Features
 
 - **Natural Language to 3D**: Convert text descriptions directly to manufacturable 3D models
-- **Multi-Agent Architecture**: Specialized AI agents for analysis, design, validation, and export
-- **Real-Time Updates**: WebSocket support for live agent communication
+- **Intelligent Design Workflow**: Requirements Agent extracts specs and asks clarifying questions, CAD Agent generates executable CadQuery code
+- **Multi-Agent Architecture**: Specialized AI agents for requirements extraction, CAD generation, validation, and export
+- **Real-Time Updates**: WebSocket support for live agent thinking and progress streaming
 - **Multiple Export Formats**: STL, STEP, OBJ, DXF, G-code, and SVG
 - **Production Ready**: Railway-optimized deployment with PostgreSQL and Redis
 - **Printer Support**: Optimized outputs for FDM, SLA, SLS, CNC, and laser cutters
+- **Automatic Retry Logic**: CAD Agent retries up to 3 times if code generation fails
 
 ## Architecture
 
@@ -115,31 +123,54 @@ Theo is a production-grade agentic CAD platform that converts natural language d
 
 ## Usage
 
-### API Example: Generate CAD Model
+### Intelligent Design Workflow (Recommended)
+
+The intelligent design workflow uses Requirements Agent → CAD Agent for best results:
 
 ```python
 import httpx
 import asyncio
 
-async def generate_model():
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "http://localhost:8000/api/v1/cad/generate",
-            json={
-                "prompt": "Create a mounting bracket 50mm x 30mm with 4 corner holes",
-                "export_formats": ["stl", "step"],
-                "printer_type": "fdm",
-                "parameters": {
-                    "hole_diameter": 3.2,
-                    "wall_thickness": 2.5
-                }
-            }
-        )
-        return response.json()
+async def create_design():
+    base_url = "http://localhost:8000"
 
-result = asyncio.run(generate_model())
-print(f"Job ID: {result['job_id']}")
+    async with httpx.AsyncClient(base_url=base_url, timeout=60.0) as client:
+        # 1. Start design session
+        response = await client.post("/api/v1/design/start", json={
+            "prompt": "Create a mounting bracket 50mm x 30mm with 4 corner holes"
+        })
+        session_id = response.json()["session_id"]
+        print(f"Session: {session_id}")
+
+        # 2. Process design request
+        response = await client.post("/api/v1/design/process", json={
+            "session_id": session_id,
+            "message": "5mm holes, PLA material, needs to support 2kg"
+        })
+        result = response.json()
+
+        # 3. Handle clarifications (if needed)
+        while result["status"] == "awaiting_clarification":
+            print(f"Questions: {result['questions']}")
+            answer = input("Your answer: ")
+
+            response = await client.post("/api/v1/design/process", json={
+                "session_id": session_id,
+                "message": answer
+            })
+            result = response.json()
+
+        # 4. Download STL when complete
+        if result["status"] == "complete":
+            response = await client.get(f"/api/v1/design/{session_id}/download")
+            with open(f"design_{session_id}.stl", "wb") as f:
+                f.write(response.content)
+            print(f"✓ STL saved: design_{session_id}.stl")
+
+asyncio.run(create_design())
 ```
+
+See **[Design Workflow Guide](docs/DESIGN_WORKFLOW.md)** for complete examples and best practices.
 
 ### WebSocket Example: Real-Time Updates
 
@@ -160,7 +191,14 @@ ws.send(JSON.stringify({type: 'status_request'}));
 
 ## API Endpoints
 
-### CAD Generation
+### Intelligent Design Workflow (New)
+- `POST /api/v1/design/start` - Start design session
+- `POST /api/v1/design/process` - Process message or clarification
+- `GET /api/v1/design/{id}/status` - Get session status
+- `GET /api/v1/design/{id}/download` - Download STL file
+- `WebSocket /api/v1/design/ws/{id}` - Real-time agent updates
+
+### CAD Generation (Legacy)
 - `POST /api/v1/cad/generate` - Generate 3D model from prompt
 - `GET /api/v1/cad/formats` - List supported export formats
 
@@ -186,13 +224,17 @@ ws.send(JSON.stringify({type: 'status_request'}));
 
 Theo uses a sophisticated multi-agent architecture:
 
-1. **Orchestrator Agent**: Coordinates the entire workflow
-2. **Analyzer Agent**: Interprets natural language and extracts design parameters
-3. **Designer Agent**: Creates parametric CAD code (CadQuery)
-4. **Validator Agent**: Checks manufacturability and design quality
-5. **Exporter Agent**: Converts to various file formats
+### Active Agents (V2)
+1. **Requirements Agent V2**: Extracts design specifications from natural language, asks clarifying questions with confidence-based logic, outputs structured JSON requirements
+2. **CAD Agent V2**: Generates executable CadQuery Python code from requirements, includes retry logic (max 3 attempts), exports to STL format
+3. **Design Orchestrator**: Coordinates workflow between agents, manages session state, handles database integration
 
-Each agent is powered by Claude Sonnet 4.5 with specialized system prompts.
+### Supporting Agents
+4. **Orchestrator Agent**: Coordinates job queue and task distribution
+5. **Validator Agent**: Checks manufacturability and design quality
+6. **Exporter Agent**: Converts to various file formats (STEP, OBJ, DXF, G-code)
+
+Each agent is powered by Claude Sonnet 4.5 (model: `claude-sonnet-4-5-20250929`) with specialized system prompts and real-time WebSocket streaming.
 
 ## Deployment
 
